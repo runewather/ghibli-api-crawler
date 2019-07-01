@@ -13,7 +13,7 @@ class CreateFilmMigration extends Migration
      */
     public function up()
     {
-        Schema::table('films', function (Blueprint $table) {
+        Schema::create('films', function (Blueprint $table) {
             $table->increments('film_id');
             $table->string('title', 255);
             $table->text('description');
