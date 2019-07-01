@@ -64,14 +64,19 @@ class ApiCrawl extends Command
                     foreach($data as $charData) {
                         if(isset($charData['name'])) {
                             $charFilm = Film::where('title', '=', $film['title'])->first();
-                            $newChar = new Character;
-                            $newChar->film_id = $charFilm->film_id;
-                            $newChar->name = $charData['name'];
-                            $newChar->gender = $charData['gender'];
-                            $newChar->age = $charData['age'];
-                            $newChar->eye_color = $charData['eye_color'];
-                            $newChar->hair_color = $charData['hair_color'];
-                            $newChar->save();
+                            $res = $client->request('GET', $charData['films'][0]);
+                            $data = json_decode($res->getBody()->getContents(), true);
+                            if($data[0]['title'] == $film['title']) {
+                                echo 'tudo certo!';
+                                $newChar = new Character;
+                                $newChar->film_id = $charFilm->film_id;
+                                $newChar->name = $charData['name'];
+                                $newChar->gender = $charData['gender'];
+                                $newChar->age = $charData['age'];
+                                $newChar->eye_color = $charData['eye_color'];
+                                $newChar->hair_color = $charData['hair_color'];
+                                $newChar->save();
+                            }                            
                         }                        
                     }                       
                 }
