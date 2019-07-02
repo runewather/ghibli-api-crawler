@@ -40,12 +40,13 @@ class ApiCrawl extends Command
      */
     public function handle()
     {
-        echo nl2br('CRAWLER STARTED!'.PHP_EOL);
+        echo 'CRAWLER STARTED!'.PHP_EOL;
         $client = new Client(['base_uri' => 'https://ghibliapi.herokuapp.com/']);
         $response = $client->request('GET', 'films');
         $data = json_decode($response->getBody()->getContents(), true);
-        
-        foreach($data as $film) {           
+        $count = 0;
+        foreach($data as $film) {  
+            echo 'LOADING: '.$count.' FROM '.count($data).PHP_EOL;         
             $row = Film::where('title', '=', $film['title'])->first();
             if($row == null) {              
                 $newFilm = new Film;
@@ -55,34 +56,51 @@ class ApiCrawl extends Command
                 $newFilm->producer = $film['producer'];
                 $newFilm->release_date = $film['release_date'];
                 $newFilm->score = $film['rt_score'];
-                $newFilm->save();                
+                $newFilm->save();       
+                $charFilm = Film::where('title', '=', $film['title'])->first();                                                                  
+                foreach($film['people'] as $charUrls) {                        
+                    $c = new Client();
+                    $r = $client->request('GET', $charUrls);
+                    $d = json_decode($r->getBody()->getContents(), true);            
+                    if($charUrls == 'https://ghibliapi.herokuapp.com/people/') {                                                                       
+                        foreach($d as $charData) {   
+                            $filmsParticipation = array();
 
-                foreach($film['people'] as $char) {  
-                    $client = new Client();
-                    $res = $client->request('GET', $char);
-                    $data = json_decode($res->getBody()->getContents(), true);       
-                    foreach($data as $charData) {
-                        if(isset($charData['name'])) {
-                            $charFilm = Film::where('title', '=', $film['title'])->first();
-                            $res = $client->request('GET', $charData['films'][0]);
-                            $data = json_decode($res->getBody()->getContents(), true);
-                            if($data[0]['title'] == $film['title']) {
-                                echo 'tudo certo!';
-                                $newChar = new Character;
-                                $newChar->film_id = $charFilm->film_id;
-                                $newChar->name = $charData['name'];
-                                $newChar->gender = $charData['gender'];
-                                $newChar->age = $charData['age'];
-                                $newChar->eye_color = $charData['eye_color'];
-                                $newChar->hair_color = $charData['hair_color'];
-                                $newChar->save();
-                            }                            
-                        }                        
-                    }                       
-                }
-                echo nl2br($film['title'].' ADD!'.PHP_EOL);
+                            foreach($charData['films'] as $fp) {
+                                $ca = new Client();
+                                $ra = $client->request('GET', $fp);
+                                $da = json_decode($ra->getBody()->getContents(), true);
+                                array_push($filmsParticipation, $da['title']);
+                            }
+
+                            foreach($filmsParticipation as $fp) {
+                                if($fp == $film['title']) {
+                                    $newChar = new Character;
+                                    $newChar->film_id = $charFilm->film_id;
+                                    $newChar->name = $charData['name'];
+                                    $newChar->gender = $charData['gender'];
+                                    $newChar->age = $charData['age'];
+                                    $newChar->eye_color = $charData['eye_color'];
+                                    $newChar->hair_color = $charData['hair_color'];
+                                    $newChar->save();
+                                }
+                            }                           
+                        } 
+                    }
+                    else {
+                        $newChar = new Character;
+                        $newChar->film_id = $charFilm->film_id;
+                        $newChar->name = $d['name'];
+                        $newChar->gender = $d['gender'];
+                        $newChar->age = $d['age'];
+                        $newChar->eye_color = $d['eye_color'];
+                        $newChar->hair_color = $d['hair_color'];
+                        $newChar->save();                          
+                    }                        
+                }                      
             }
+            $count += 1;
         }
-        
-    }
+        echo 'CRAWLER FINISHED!'.PHP_EOL;
+    }    
 }
