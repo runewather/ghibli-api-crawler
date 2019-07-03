@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="{{ app()->getLocale() }}">
 <head>
   <meta charset="UTF-8">
@@ -13,22 +13,22 @@
     <thead>
       <tr>
         <th>Name</th>
-        <th>Position</th>
-        <th>Office</th>
         <th>Age</th>
-        <th>Start date</th>
-        <th>Salary</th>
+        <th>Film</th>
+        <th>Release Date</th>
+        <th>Film Score</th>
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td>Tiger Nixon</td>
-        <td>System Architect</td>
-        <td>Edinburgh</td>
-        <td>61</td>
-        <td>2011/04/25</td>
-        <td>$320,800</td>
-      </tr>      
+      @foreach($data as $d)
+        <tr>
+          <td>{{ $d['character_name'] }}</td>
+          <td>{{ $d['character_age'] }}</td>
+          <td>{{ $d['film_title'] }}</td>
+          <td>{{ $d['film_release_date'] }}</td>
+          <td>{{ $d['film_score'] }}</td>
+        </tr>
+      @endforeach      
     </tbody>
   </table>
 </div>
