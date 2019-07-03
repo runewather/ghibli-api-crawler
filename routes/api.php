@@ -13,6 +13,4 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::get('/test', function () {
-    return 'test';
-});
+Route::get('/pessoas', 'PersonController@getPeople');
