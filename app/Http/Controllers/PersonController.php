@@ -13,9 +13,11 @@ class PersonController extends Controller
         $this->personRepository = $personRepository;
     }
 
-    public function getPeople(Request $request) {
-        $data = $this->personRepository->getPeople(); 
+    private function getPeopleJson($data) { 
+        return json_encode($res);
+    }
 
+    private function getPeopleHTML($data) {
         $res = array();
 
         foreach($data as $d) {
@@ -27,6 +29,29 @@ class PersonController extends Controller
             array_push($res, $char);
         }      
         
-        return $res;
+        return json_encode($res);
+    }
+
+    public function getPeople(Request $request, $fmt) {
+        $data = $this->personRepository->getPeople(); 
+
+        $res = array();
+
+        foreach($data as $d) {
+            $char['character_name'] = $d['name'];
+            $char['character_age'] = $d['age'];
+            $char['film_title'] = $d['film']['title'];
+            $char['film_release_date'] = $d['film']['release_date'];
+            $char['film_score'] = $d['film']['score'];
+            array_push($res, $char);
+        }  
+
+        if($fmt == "json") {
+            return json_encode($res);
+        } else if($fmt == 'html') {
+            return view('dataTable', ['data' => $res]);
+        }
+
+        return "Incorrect format, try one of these json, csv, html";
     }
 }
