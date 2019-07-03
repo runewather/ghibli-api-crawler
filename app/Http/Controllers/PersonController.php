@@ -13,23 +13,28 @@ class PersonController extends Controller
         $this->personRepository = $personRepository;
     }
 
-    private function getPeopleJson($data) { 
-        return json_encode($res);
-    }
-
-    private function getPeopleHTML($data) {
-        $res = array();
-
-        foreach($data as $d) {
-            $char['character_name'] = $d['name'];
-            $char['character_age'] = $d['age'];
-            $char['film_title'] = $d['film']['title'];
-            $char['film_release_date'] = $d['film']['release_date'];
-            $char['film_score'] = $d['film']['score'];
-            array_push($res, $char);
-        }      
+    private function getPeopleCSV($data) {
+        $file = "data.csv";
+        $csv = fopen($file, "w") or die("Unable to open file!");
         
-        return json_encode($res);
+        $tableHead = array('Name', 'Age', 'Film', 'Release Date', 'Film Score');
+        fputcsv($csv, $tableHead);
+
+        foreach($data as $row) {
+            fputcsv($csv, $row);
+        }
+
+        fclose($csv);
+
+        header('Content-Description: File Transfer');
+        header('Content-Disposition: attachment; filename='.basename($file));
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($file));
+        header("Content-Type: text/plain");
+        
+        readfile($file);
     }
 
     public function getPeople(Request $request, $fmt) {
@@ -50,6 +55,8 @@ class PersonController extends Controller
             return json_encode($res);
         } else if($fmt == 'html') {
             return view('dataTable', ['data' => $res]);
+        } else if($fmt == 'csv') {
+            $this->getPeopleCSV($res);
         }
 
         return "Incorrect format, try one of these json, csv, html";
