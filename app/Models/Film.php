@@ -11,4 +11,10 @@ class Film extends Model
     protected $primaryKey = 'film_id';
 
     public $timestamps = false;
+
+    public function characters()
+    {
+        return $this->hasMany('App\Models\Character', 'film_id');
+    }
+
 }
