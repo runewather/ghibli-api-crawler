@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="{{ app()->getLocale() }}">
 <head>
   <meta charset="UTF-8">
@@ -20,17 +20,15 @@
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <?php 
-          @foreach ($data as $d)
-            <td>$d['character_name']</td>
-            <td>$d['character_age']</td>
-            <td>$d['film_title']</td>
-            <td>$d['film_release_date']</td>
-            <td>$d['film_score']</td>  
-          @endforeach
-        ?>
-      </tr>      
+      @foreach ($data as $d)
+        <tr>
+          <td>{{$d['character_name']}}</td>
+          <td>{{$d['character_age']}}</td>
+          <td>{{$d['film_title']}}</td>
+          <td>{{$d['film_release_date']}}</td>
+          <td>{{$d['film_score']}}</td>  
+        </tr>      
+      @endforeach    
     </tbody>
   </table>
 </div>

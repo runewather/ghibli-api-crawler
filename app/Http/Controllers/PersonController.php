@@ -13,11 +13,31 @@ class PersonController extends Controller
         $this->personRepository = $personRepository;
     }
 
-    private function getPeopleJson($data) { 
-        return json_encode($res);
+    private function getPeopleCSV($data) {
+        $file = "data.csv";
+        $csv = fopen($file, "w") or die("Unable to open file!");
+        
+        $tableHead = array('Name', 'Age', 'Film', 'Release Date', 'Film Score');
+        fputcsv($csv, $tableHead);
+
+        foreach($data as $row) {
+            fputcsv($csv, $row);
+        }
+
+        fclose($csv);
+
+        header('Content-Description: File Transfer');
+        header('Content-Disposition: attachment; filename='.basename($file));
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($file));
+        header("Content-Type: text/plain");
+        
+        readfile($file);
     }
 
-    private function getPeopleHTML($data) {
+    public function filterData($data) {
         $res = array();
 
         foreach($data as $d) {
@@ -27,29 +47,27 @@ class PersonController extends Controller
             $char['film_release_date'] = $d['film']['release_date'];
             $char['film_score'] = $d['film']['score'];
             array_push($res, $char);
-        }      
-        
-        return json_encode($res);
+        }
+
+        return $res;
+    }
+    
+    public function getPeopleJSON() {
+        $data = $this->personRepository->getPeople(); 
+        return json_encode($this->filterData($data));
     }
 
-    public function getPeople(Request $request, $fmt) {
+    public function getPeopleFormat(Request $request, $fmt) {
         $data = $this->personRepository->getPeople(); 
 
-        $res = array();
-
-        foreach($data as $d) {
-            $char['character_name'] = $d['name'];
-            $char['character_age'] = $d['age'];
-            $char['film_title'] = $d['film']['title'];
-            $char['film_release_date'] = $d['film']['release_date'];
-            $char['film_score'] = $d['film']['score'];
-            array_push($res, $char);
-        }  
+        $res = $this->filterData($data);          
 
         if($fmt == "json") {
             return json_encode($res);
         } else if($fmt == 'html') {
             return view('dataTable', ['data' => $res]);
+        } else if($fmt == 'csv') {
+            $this->getPeopleCSV($res);
         }
 
         return "Incorrect format, try one of these json, csv, html";
