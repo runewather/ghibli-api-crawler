@@ -37,9 +37,7 @@ class PersonController extends Controller
         readfile($file);
     }
 
-    public function getPeople(Request $request, $fmt) {
-        $data = $this->personRepository->getPeople(); 
-
+    public function filterData($data) {
         $res = array();
 
         foreach($data as $d) {
@@ -49,7 +47,20 @@ class PersonController extends Controller
             $char['film_release_date'] = $d['film']['release_date'];
             $char['film_score'] = $d['film']['score'];
             array_push($res, $char);
-        }  
+        }
+
+        return $res;
+    }
+    
+    public function getPeopleJSON() {
+        $data = $this->personRepository->getPeople(); 
+        return json_encode($this->filterData($data));
+    }
+
+    public function getPeopleFormat(Request $request, $fmt) {
+        $data = $this->personRepository->getPeople(); 
+
+        $res = $this->filterData($data);          
 
         if($fmt == "json") {
             return json_encode($res);
